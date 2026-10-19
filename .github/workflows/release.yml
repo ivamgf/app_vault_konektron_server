@@ -1,0 +1,75 @@
+# Gera o instalador do App Vault Protection.
+# - Em qualquer execução manual (Actions > Release > Run workflow): build + artefato para download.
+# - Ao enviar uma tag vX.Y.Z (igual à versão em version.py): build + Release com o instalador.
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Conferir tag x version.py
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          $v = (Select-String -Path version.py -Pattern '__version__\s*=\s*"(.+)"').Matches[0].Groups[1].Value
+          if ("v$v" -ne $env:TAG) { throw "A tag $env:TAG difere da versão $v em version.py" }
+
+      - name: Instalar Inno Setup (se necessário)
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) {
+            choco install innosetup -y --no-progress
+          }
+
+      - name: Build (testes, executável, instalador)
+        shell: pwsh
+        env:
+          # Opcional: cadastre estes secrets para assinar os executáveis.
+          CODESIGN_PFX_BASE64: ${{ secrets.CODESIGN_PFX_BASE64 }}
+          CODESIGN_PFX_PASSWORD: ${{ secrets.CODESIGN_PFX_PASSWORD }}
+        run: ./build.ps1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: instalador
+          path: dist/installer/*
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: instalador
+          path: out
+
+      - name: Publicar Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          cd out
+          sha256sum -c SHA256SUMS.txt
+          gh release create "$TAG" ./* --repo "$REPO" --title "App Vault Protection $TAG" \
+            --notes "Baixe o AppVaultProtection-Setup e confira o SHA-256 em SHA256SUMS.txt antes de instalar."

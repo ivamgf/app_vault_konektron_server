@@ -1,0 +1,2 @@
+# Arquivos usados no Linux mantêm LF mesmo em checkouts no Windows.
+deploy/linux/** text eol=lf

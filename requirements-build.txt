@@ -1,0 +1,4 @@
+# Dependências do build (versões fixas para builds reproduzíveis).
+-r requirements.txt
+cryptography==50.0.2
+pyinstaller==6.22.3

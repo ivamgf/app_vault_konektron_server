@@ -1,0 +1,31 @@
+# Configuração do App Vault Server. Caminhos relativos partem da pasta deste arquivo.
+# Linux:   /etc/appvault/server.toml
+# Windows: C:\ProgramData\AppVaultServer\server.toml
+
+# Cofre publicado a partir do App Vault desktop (Cofre -> Fazer backup...).
+vault_file = "/var/lib/appvault/cofre.db"
+# Estado (última geração aceita) e log de auditoria. O serviço precisa gravar aqui.
+state_dir = "/var/lib/appvault"
+policy_file = "/etc/appvault/policy.toml"
+
+[api]
+# Interface onde os sistemas se conectam. Prefira o IP da rede interna a 0.0.0.0.
+host = "0.0.0.0"
+port = 8443
+
+[control]
+# Porta de operação (unseal/seal/status). Sempre escuta só em 127.0.0.1.
+port = 8444
+
+[tls]
+ca = "/etc/appvault/tls/ca.pem"
+cert = "/etc/appvault/tls/server.pem"
+key = "/etc/appvault/tls/server.key"
+# Lista de séries revogadas, copiada da CA. Se configurada e ilegível, ninguém entra.
+revoked = "/etc/appvault/tls/revoked.txt"
+
+# Opcional: certificado padrão do operador para unseal/seal/status
+# (cada operador também pode usar --cert/--key com os próprios arquivos).
+# [operator]
+# cert = "/home/operador/appvault/op-01.pem"
+# key = "/home/operador/appvault/op-01.key"

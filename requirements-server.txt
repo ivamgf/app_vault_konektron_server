@@ -1,0 +1,2 @@
+# App Vault Server (Python 3.11+). O cliente (appvault_client.py) não tem dependências.
+cryptography==50.0.2
