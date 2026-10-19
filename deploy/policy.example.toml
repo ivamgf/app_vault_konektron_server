@@ -1,0 +1,13 @@
+# Quem pode operar o servidor e o que cada sistema pode ler.
+# Identidade = CN do certificado emitido pela CA interna.
+# Ambiente e nome comparam sem diferenciar maiúsculas; aceitam curingas * ? [abc].
+# O servidor relê este arquivo quando ele muda. Se ficar inválido, nega tudo.
+
+# Operadores: só desbloqueiam, trancam e consultam o estado. Não leem segredos.
+operators = ["op-01"]
+
+[clients.sistema-x]
+allow = [
+  { environment = "Produção", name = "Banco SIAFE" },
+  { environment = "Produção", name = "SFTP *" },
+]

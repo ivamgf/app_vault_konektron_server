@@ -1,0 +1,42 @@
+# /etc/systemd/system/appvault-server.service
+# Após iniciar (ou reiniciar) o serviço fica TRANCADO até um operador rodar 'unseal'.
+[Unit]
+Description=App Vault Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=appvault
+Group=appvault
+WorkingDirectory=/opt/appvault
+ExecStart=/opt/appvault/.venv/bin/python -m appvault_server serve -c /etc/appvault/server.toml
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+# Segredos ficam na memória: sem core dump, sem acesso a outras áreas do sistema.
+LimitCORE=0
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/appvault
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,22 @@
+<!--
+  Serviço Windows via WinSW (https://github.com/winsw/winsw).
+  Renomeie WinSW-x64.exe para AppVaultServer.exe, deixe-o ao lado deste arquivo e rode
+  "AppVaultServer.exe install". Depois defina a conta dedicada do serviço (veja docs/SERVIDOR.md).
+  Após iniciar (ou reiniciar) o serviço fica TRANCADO até um operador rodar 'unseal'.
+-->
+<service>
+  <id>AppVaultServer</id>
+  <name>App Vault Server</name>
+  <description>Entrega segredos do App Vault aos sistemas via mTLS.</description>
+  <executable>C:\AppVaultServer\.venv\Scripts\python.exe</executable>
+  <arguments>-m appvault_server serve -c C:\ProgramData\AppVaultServer\server.toml</arguments>
+  <workingdirectory>C:\AppVaultServer</workingdirectory>
+  <startmode>Automatic</startmode>
+  <onfailure action="restart" delay="5 sec"/>
+  <stoptimeout>15 sec</stoptimeout>
+  <logpath>C:\ProgramData\AppVaultServer\logs</logpath>
+  <log mode="roll-by-size">
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>20</keepFiles>
+  </log>
+</service>
